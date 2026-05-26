@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Club Management</title>
+ 
+</head>
+<body>
+    <main class="login-panel">
+        <h1>Club Login</h1>
+        <p>Sign in to access the club management system.</p>
+
+        <form id="loginForm">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" autocomplete="email" required>
+
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" autocomplete="current-password" required>
+
+            <button id="loginButton" type="submit">Login</button>
+            <div id="message" class="message" aria-live="polite"></div>
+        </form>
+
+    </main>
+
+    <script src="/auth/login.js"></script>
+</body>
+</html>
