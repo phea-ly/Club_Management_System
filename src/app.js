@@ -26,6 +26,10 @@ app.get("/login", (req, res) => {
     sendView(res, "auth/login.html");
 });
 
+app.get("/register", (req, res) => {
+    sendView(res, "auth/register.html");
+});
+
 app.get("/users", (req, res) => {
     sendView(res, "users.html");
 });

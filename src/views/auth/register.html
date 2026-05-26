@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | Club Management</title>
+</head>
+<body>
+    <main class="register-panel">
+        <h1>Create Account</h1>
+        <p>Register a new club management account.</p>
+
+        <form id="registerForm">
+            <label for="firstName">First Name</label>
+            <input id="firstName" name="firstName" type="text" autocomplete="given-name" required>
+
+            <label for="lastName">Last Name</label>
+            <input id="lastName" name="lastName" type="text" autocomplete="family-name" required>
+
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" autocomplete="email" required>
+
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" autocomplete="new-password" required>
+
+            <button id="registerButton" type="submit">Register</button>
+            <div id="message" aria-live="polite"></div>
+        </form>
+
+        <p>
+            Already have an account?
+            <a href="/login">Login</a>
+        </p>
+    </main>
+
+    <script src="/auth/register.js"></script>
+</body>
+</html>
