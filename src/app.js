@@ -5,8 +5,6 @@ const path = require("path");
 
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
-const authMiddleware = require("./middlewares/authMiddleware");
-const { authorize, ROLES } = require("./middlewares/roleMiddleware");
 
 const app = express();
 

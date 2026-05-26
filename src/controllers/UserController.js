@@ -1,33 +1,26 @@
-const db = require("../config/db");
+const UserService = require("../services/UserService");
 
-const getUsers = async (req, res) => {
-    try {
-        const [users] = await db.execute(`
-            SELECT
-                users.id,
-                users.first_name,
-                users.last_name,
-                users.email,
-                users.is_active,
-                users.created_at,
-                roles.name AS role
-            FROM users
-            LEFT JOIN roles ON users.role_id = roles.id
-            ORDER BY users.created_at DESC
-        `);
+class UserController {
+    constructor(userService = new UserService()) {
+        this.userService = userService;
 
-        return res.json({
-            success: true,
-            users
-        });
-    } catch (error) {
-        console.error("Get users error:", error.message);
-
-        return res.status(500).json({
-            success: false,
-            message: "Database error"
-        });
+        this.getUsers = this.getUsers.bind(this);
     }
-};
 
-module.exports = { getUsers };
+    async getUsers(req, res) {
+        try {
+            const result = await this.userService.getUsers();
+
+            return res.json(result);
+        } catch (error) {
+            console.error("Get users error:", error.message);
+
+            return res.status(500).json({
+                success: false,
+                message: "Database error"
+            });
+        }
+    }
+}
+
+module.exports = new UserController();
