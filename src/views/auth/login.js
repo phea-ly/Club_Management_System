@@ -37,6 +37,17 @@ form.addEventListener("submit", async (event) => {
 
         localStorage.setItem("loggedInUser", JSON.stringify(result.user));
         showMessage(result.message || "login successfully", "success");
+
+        if (result.user.role === "ADMIN") {
+            window.location.href = "/admin";
+            return;
+        }
+
+        if (result.user.role === "CLUB_LEADER") {
+            window.location.href = "/leader";
+            return;
+        }
+
         window.location.href = "/users";
     } catch (error) {
         showMessage("Cannot connect to server", "error");

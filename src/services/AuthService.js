@@ -11,6 +11,7 @@ class AuthService {
         const lastName = data.lastName?.trim();
         const email = data.email?.trim();
         const password = data.password?.trim();
+        const roleName = "MEMBER";
 
         if (!firstName || !lastName || !email || !password) {
             return {
@@ -44,14 +45,14 @@ class AuthService {
             };
         }
 
-        const role = await this.userRepository.findRoleByName("MEMBER");
+        const role = await this.userRepository.findRoleByName(roleName);
 
         if (!role) {
             return {
                 statusCode: 500,
                 body: {
                     success: false,
-                    message: "Default role not found"
+                    message: "Role not found"
                 }
             };
         }

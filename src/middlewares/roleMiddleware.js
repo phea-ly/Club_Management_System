@@ -1,7 +1,7 @@
 const ROLES = {
-    ADMIN: "admin",
-    CLUB_LEADER: "club_leader",
-    MEMBER: "member"
+    ADMIN: "ADMIN",
+    CLUB_LEADER: "CLUB_LEADER",
+    MEMBER: "MEMBER"
 };
 
 const authorize = (...allowedRoles) => {

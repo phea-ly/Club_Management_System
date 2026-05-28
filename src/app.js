@@ -32,6 +32,14 @@ app.get("/users", (req, res) => {
     sendView(res, "users.html");
 });
 
+app.get("/admin", (req, res) => {
+    sendView(res, "admin.html");
+});
+
+app.get("/leader", (req, res) => {
+    sendView(res, "leader.html");
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 

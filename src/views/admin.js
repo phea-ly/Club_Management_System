@@ -5,12 +5,8 @@ if (!loggedInUser) {
     window.location.href = "/login";
 }
 
-if (loggedInUser && loggedInUser.role === "ADMIN") {
-    window.location.href = "/admin";
-}
-
-if (loggedInUser && loggedInUser.role === "CLUB_LEADER") {
-    window.location.href = "/leader";
+if (loggedInUser && loggedInUser.role !== "ADMIN") {
+    window.location.href = "/users";
 }
 
 logoutButton.addEventListener("click", () => {
