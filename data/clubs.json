@@ -1,0 +1,71 @@
+[
+  {
+    "id": "1779766650642",
+    "name": "Chess Club",
+    "description": "Students meet weekly to play and learn chess.",
+    "category": "Games",
+    "leader": {
+      "name": "Mr. Dara",
+      "email": "dara@example.com"
+    },
+    "activities": [
+      "Weekly practice",
+      "School tournament"
+    ],
+    "members": [
+      {
+        "name": "Alice",
+        "email": "alice@example.com",
+        "joinedAt": "2026-05-26T03:37:30.691Z"
+      }
+    ],
+    "joinRequests": [
+      {
+        "id": "1779766650678",
+        "studentName": "Alice",
+        "studentEmail": "alice@example.com",
+        "reason": "I want to join tournaments.",
+        "status": "approved",
+        "requestedAt": "2026-05-26T03:37:30.678Z",
+        "reviewedAt": "2026-05-26T03:37:30.691Z"
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-05-26T03:37:30.607Z",
+    "updatedAt": "2026-05-26T03:37:30.691Z"
+  },
+  {
+    "id": "1779778242030",
+    "name": "OOP Club",
+    "description": "Practice inheritance and polymorphism.",
+    "category": "Programming",
+    "leader": {
+      "name": "Teacher",
+      "email": "teacher@example.com"
+    },
+    "activities": [
+      "Code review"
+    ],
+    "members": [
+      {
+        "name": "Student One",
+        "email": "student@example.com",
+        "joinedAt": "2026-05-26T06:50:42.067Z"
+      }
+    ],
+    "joinRequests": [
+      {
+        "id": "1779778242049",
+        "studentName": "Student One",
+        "studentEmail": "student@example.com",
+        "reason": "",
+        "status": "approved",
+        "requestedAt": "2026-05-26T06:50:42.049Z",
+        "reviewedAt": "2026-05-26T06:50:42.067Z"
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-05-26T06:50:42.023Z",
+    "updatedAt": "2026-05-26T06:50:42.067Z"
+  }
+]

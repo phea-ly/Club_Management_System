@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn src/app.ts",
-    "build": "tsc",
-    "start": "node dist/app.js"
+    "dev": "node src/app.js",
+    "build": "echo \"No build step configured\"",
+    "start": "node src/app.js"
   },
   "repository": {
     "type": "git",
