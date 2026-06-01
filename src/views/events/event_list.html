@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club Events</title>
+    <style>
+        :root {
+            color-scheme: light;
+            font-family: Arial, Helvetica, sans-serif;
+            --ink: #18202f;
+            --muted: #617086;
+            --line: #d9e1ea;
+            --surface: #ffffff;
+            --background: #eef3f7;
+            --accent: #176b87;
+            --accent-dark: #0e4f64;
+            --warm: #f4a261;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--background);
+            color: var(--ink);
+        }
+
+        main {
+            width: min(1120px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 32px 0;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            margin: 0 0 6px;
+            font-size: clamp(28px, 4vw, 42px);
+            letter-spacing: 0;
+        }
+
+        p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .status {
+            min-width: 170px;
+            color: var(--accent-dark);
+            font-weight: 700;
+            text-align: right;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        form,
+        .event-card,
+        .empty {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            box-shadow: 0 12px 28px rgba(24, 32, 47, 0.08);
+        }
+
+        form {
+            display: grid;
+            gap: 12px;
+            padding: 18px;
+        }
+
+        .form-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .form-header h2 {
+            margin: 0;
+            font-size: 20px;
+            letter-spacing: 0;
+        }
+
+        label {
+            display: grid;
+            gap: 6px;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            color: var(--ink);
+            font: inherit;
+            padding: 10px 12px;
+        }
+
+        textarea {
+            min-height: 96px;
+            resize: vertical;
+        }
+
+        button {
+            border: 0;
+            border-radius: 6px;
+            background: var(--accent);
+            color: #ffffff;
+            cursor: pointer;
+            font: inherit;
+            font-weight: 700;
+            min-height: 42px;
+            padding: 10px 14px;
+        }
+
+        button:hover {
+            background: var(--accent-dark);
+        }
+
+        .button-row,
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .button-row button {
+            flex: 1 1 130px;
+        }
+
+        .secondary {
+            background: #dfe7ee;
+            color: var(--ink);
+        }
+
+        .secondary:hover {
+            background: #cbd7e2;
+        }
+
+        .danger {
+            background: #b33a3a;
+        }
+
+        .danger:hover {
+            background: #8e2929;
+        }
+
+        .ghost {
+            background: transparent;
+            border: 1px solid var(--line);
+            color: var(--ink);
+        }
+
+        .ghost:hover {
+            background: #edf3f8;
+        }
+
+        .events {
+            display: grid;
+            gap: 14px;
+        }
+
+        .event-card {
+            display: grid;
+            gap: 12px;
+            padding: 18px;
+        }
+
+        .event-card header {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .event-card h2 {
+            margin: 0;
+            font-size: 20px;
+            letter-spacing: 0;
+        }
+
+        .badge {
+            align-self: start;
+            border-radius: 999px;
+            background: #fff1df;
+            color: #8b4a10;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 6px 10px;
+            white-space: nowrap;
+        }
+
+        .meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            color: var(--muted);
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .meta span {
+            border-left: 3px solid var(--warm);
+            padding-left: 8px;
+        }
+
+        .empty {
+            padding: 24px;
+            text-align: center;
+        }
+   
+    </style>
+</head>
+<body>
+    <main>
+        <section class="topbar">
+            <div>
+                <h1>Club Events</h1>
+                <p>Create and preview upcoming club activities.</p>
+            </div>
+            <div class="status" id="status">Loading events...</div>
+        </section>
+
+        <section class="layout">
+            <form id="eventForm">
+                <div class="form-header">
+                    <h2 id="formTitle">Create Event</h2>
+                    <button class="ghost" id="cancelEdit" type="button" hidden>Cancel</button>
+                </div>
+                <input name="id" type="hidden">
+                <label>
+                    Title
+                    <input name="title" type="text" placeholder="Orientation Day" required>
+                </label>
+                <label>
+                    Date
+                    <input name="date" type="date" required>
+                </label>
+                <label>
+                    Time
+                    <input name="time" type="time" required>
+                </label>
+                <label>
+                    Location
+                    <input name="location" type="text" placeholder="Main Hall" required>
+                </label>
+                <label>
+                    Description
+                    <textarea name="description" placeholder="Short event details" required></textarea>
+                </label>
+                <div class="button-row">
+                    <button id="submitButton" type="submit">Create Event</button>
+                </div>
+            </form>
+
+            <div class="events" id="events"></div>
+        </section>
+    </main>
+
+    <script>
+        const statusEl = document.querySelector("#status");
+        const eventsEl = document.querySelector("#events");
+        const form = document.querySelector("#eventForm");
+        const formTitle = document.querySelector("#formTitle");
+        const submitButton = document.querySelector("#submitButton");
+        const cancelEditButton = document.querySelector("#cancelEdit");
+        let currentEvents = [];
+
+        function formatDate(value) {
+            if (!value) {
+                return "No date";
+            }
+
+            return new Date(value).toLocaleDateString(undefined, {
+                month: "short",
+                day: "numeric",
+                year: "numeric"
+            });
+        }
+
+        function escapeHtml(value) {
+            return String(value || "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+        function renderEvents(events) {
+            currentEvents = events;
+            statusEl.textContent = `${events.length} event${events.length === 1 ? "" : "s"}`;
+
+            if (!events.length) {
+                eventsEl.innerHTML = '<div class="empty"><p>No events yet. Create the first one.</p></div>';
+                return;
+            }
+
+            eventsEl.innerHTML = events.map((event) => `
+                <article class="event-card">
+                    <header>
+                        <h2>${escapeHtml(event.title)}</h2>
+                        <span class="badge">${event.registration_count || 0} registered</span>
+                    </header>
+                    <div class="meta">
+                        <span>${formatDate(event.event_date)}</span>
+                        <span>${String(event.event_time || "").slice(0, 5)}</span>
+                        <span>${escapeHtml(event.location)}</span>
+                    </div>
+                    <p>${escapeHtml(event.description)}</p>
+                    <div class="actions">
+                        <button class="secondary" type="button" data-action="edit" data-id="${event.id}">Edit</button>
+                        <button class="danger" type="button" data-action="delete" data-id="${event.id}">Delete</button>
+                    </div>
+                </article>
+            `).join("");
+        }
+
+        function resetForm() {
+            form.reset();
+            form.elements.id.value = "";
+            formTitle.textContent = "Create Event";
+            submitButton.textContent = "Create Event";
+            cancelEditButton.hidden = true;
+        }
+
+        function setEditMode(event) {
+            form.elements.id.value = event.id;
+            form.elements.title.value = event.title || "";
+            form.elements.date.value = String(event.event_date || "").slice(0, 10);
+            form.elements.time.value = String(event.event_time || "").slice(0, 5);
+            form.elements.location.value = event.location || "";
+            form.elements.description.value = event.description || "";
+            formTitle.textContent = "Update Event";
+            submitButton.textContent = "Update Event";
+            cancelEditButton.hidden = false;
+            form.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+
+        async function loadEvents() {
+            statusEl.textContent = "Loading events...";
+
+            try {
+                const response = await fetch("/api/events");
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || "Could not load events");
+                }
+
+                renderEvents(result.data || []);
+            } catch (error) {
+                statusEl.textContent = "Database unavailable";
+                eventsEl.innerHTML = `<div class="empty"><p>${error.message}</p></div>`;
+            }
+        }
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const payload = Object.fromEntries(new FormData(form).entries());
+            const eventId = payload.id;
+            delete payload.id;
+            statusEl.textContent = eventId ? "Updating event..." : "Creating event...";
+
+            try {
+                const response = await fetch(eventId ? `/api/events/${eventId}` : "/api/events", {
+                    method: eventId ? "PUT" : "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || "Could not create event");
+                }
+
+                resetForm();
+                await loadEvents();
+            } catch (error) {
+                statusEl.textContent = error.message;
+            }
+        });
+
+        cancelEditButton.addEventListener("click", resetForm);
+
+        eventsEl.addEventListener("click", async (event) => {
+            const button = event.target.closest("button[data-action]");
+
+            if (!button) {
+                return;
+            }
+
+            const eventId = button.dataset.id;
+            const action = button.dataset.action;
+
+            if (action === "edit") {
+                const selectedEvent = currentEvents.find((item) => String(item.id) === String(eventId));
+
+                if (selectedEvent) {
+                    setEditMode(selectedEvent);
+                }
+
+                return;
+            }
+
+            if (action === "delete") {
+                const selectedEvent = currentEvents.find((item) => String(item.id) === String(eventId));
+                const eventName = selectedEvent ? selectedEvent.title : "this event";
+
+                if (!confirm(`Delete "${eventName}"?`)) {
+                    return;
+                }
+
+                statusEl.textContent = "Deleting event...";
+
+                try {
+                    const response = await fetch(`/api/events/${eventId}`, {
+                        method: "DELETE"
+                    });
+                    const result = await response.json();
+
+                    if (!response.ok || !result.success) {
+                        throw new Error(result.message || "Could not delete event");
+                    }
+
+                    resetForm();
+                    await loadEvents();
+                } catch (error) {
+                    statusEl.textContent = error.message;
+                }
+            }
+        });
+
+        loadEvents();
+    </script>
+</body>
+</html>

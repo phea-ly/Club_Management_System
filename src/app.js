@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path");
 const env = require("./config/env");
 const eventRoutes = require("./routes/eventRoutes");
 
@@ -12,6 +13,10 @@ app.get("/", (req, res) => {
         success: true,
         message: "Club Management System API"
     });
+});
+
+app.get("/interface", (req, res) => {
+    res.sendFile(path.join(__dirname, "views", "events", "event_list.html"));
 });
 
 app.use("/events", eventRoutes);
