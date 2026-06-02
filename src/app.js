@@ -1,5 +1,6 @@
 const express = require("express");
 const clubRoutes = require("./routes/clubRoutes");
+const attendanceRoutes = require("./routes/attendanceRoutes");
 const renderClubListPage = require("./views/clubs/club_list");
 
 const app = express();
@@ -17,6 +18,7 @@ app.get("/club-management", (req, res) => {
 });
 
 app.use("/clubs", clubRoutes);
+app.use("/attendance", attendanceRoutes);
 
 if (require.main === module) {
   app.listen(port, () => {

@@ -271,6 +271,7 @@ const renderClubListPage = () => `<!doctype html>
     }
 
     .request-item,
+    .attendance-item,
     .member-item {
       border: 1px solid var(--line);
       border-radius: 6px;
@@ -279,9 +280,50 @@ const renderClubListPage = () => `<!doctype html>
     }
 
     .request-item strong,
+    .attendance-item strong,
     .member-item strong {
       display: block;
       margin-bottom: 4px;
+    }
+
+    .attendance-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 150px;
+      gap: 10px;
+      align-items: center;
+      border-top: 1px solid var(--line);
+      padding-top: 10px;
+      margin-top: 10px;
+    }
+
+    .attendance-row:first-child {
+      border-top: 0;
+      padding-top: 0;
+      margin-top: 0;
+    }
+
+    .metric-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 8px;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 12px;
     }
 
     .status {
@@ -430,6 +472,11 @@ const renderClubListPage = () => `<!doctype html>
       .form-grid {
         grid-template-columns: 1fr;
       }
+
+      .attendance-row,
+      .metric-row {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -550,9 +597,53 @@ const renderClubListPage = () => `<!doctype html>
     </div>
   </div>
 
+  <div class="modal-backdrop" id="attendanceModal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="attendanceModalTitle">
+      <div class="modal-header">
+        <h3 id="attendanceModalTitle">Take Attendance</h3>
+        <button class="btn secondary small" id="closeAttendanceModal" type="button">Close</button>
+      </div>
+      <form id="attendanceForm">
+        <input type="hidden" id="attendanceClubId">
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="activityName">Meeting or event</label>
+            <input id="activityName" required>
+          </div>
+          <div class="form-field">
+            <label for="activityDate">Date</label>
+            <input id="activityDate" type="date" required>
+          </div>
+          <div class="form-field">
+            <label for="activityType">Type</label>
+            <select id="activityType">
+              <option value="meeting">Meeting</option>
+              <option value="event">Event</option>
+              <option value="practice">Practice</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="recordedBy">Recorded by</label>
+            <input id="recordedBy">
+          </div>
+          <div class="form-field full">
+            <label>Members</label>
+            <div id="attendanceMembers"></div>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn secondary" type="button" id="cancelAttendanceForm">Cancel</button>
+          <button class="btn" type="submit">Save Attendance</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
     const state = {
       clubs: [],
+      attendance: [],
+      attendanceReport: null,
       selectedClubId: null,
       search: "",
     };
@@ -607,10 +698,22 @@ const renderClubListPage = () => `<!doctype html>
         if (!state.selectedClubId && state.clubs[0]) {
           state.selectedClubId = state.clubs[0].id;
         }
+        await loadAttendance();
         render();
       } catch (error) {
         showNotice(error.message, true);
       }
+    };
+
+    const loadAttendance = async () => {
+      if (!state.selectedClubId || roleSelect.value === "student") {
+        state.attendance = [];
+        state.attendanceReport = null;
+        return;
+      }
+
+      state.attendance = await api("/attendance?clubId=" + encodeURIComponent(state.selectedClubId));
+      state.attendanceReport = await api("/attendance/reports?clubId=" + encodeURIComponent(state.selectedClubId));
     };
 
     const filteredClubs = () => {
@@ -711,11 +814,38 @@ const renderClubListPage = () => `<!doctype html>
           }).join("")
         : '<p class="detail-value">No join requests.</p>';
 
+      const managerAttendanceAction = roleSelect.value === "student"
+        ? ""
+        : '<button class="btn small" type="button" onclick="openAttendanceModal(\\'' + club.id + '\\')">Take Attendance</button>';
+
+      const report = state.attendanceReport?.totals || {
+        activities: 0,
+        attendancePercentage: 0,
+        participationPercentage: 0,
+      };
+
+      const attendanceHistory = state.attendance.length
+        ? state.attendance.slice(0, 5).map((attendance) => [
+            '<div class="attendance-item">',
+            '<strong>' + escapeHtml(attendance.activityName) + '</strong>',
+            '<span>' + new Date(attendance.activityDate).toLocaleDateString() + ' - ' + escapeHtml(attendance.activityType) + '</span>',
+            '<div class="metric-row">',
+            '<div class="metric"><strong>' + attendance.summary.present + '</strong><span>Present</span></div>',
+            '<div class="metric"><strong>' + attendance.summary.late + '</strong><span>Late</span></div>',
+            '<div class="metric"><strong>' + attendance.summary.absent + '</strong><span>Absent</span></div>',
+            '</div>',
+            '</div>',
+          ].join("")).join("")
+        : '<p class="detail-value">No attendance recorded yet.</p>';
+
       detailsPanel.innerHTML = [
         '<h3>' + escapeHtml(club.name) + '</h3>',
         '<div class="tag-row">',
         '<span class="tag">' + escapeHtml(club.category) + '</span>',
         '<span class="tag">' + club.joinRequests.filter((request) => request.status === "pending").length + ' pending</span>',
+        '</div>',
+        '<div class="card-actions">',
+        managerAttendanceAction,
         '</div>',
         '<div class="detail-block">',
         '<p class="detail-label">Description</p>',
@@ -734,14 +864,28 @@ const renderClubListPage = () => `<!doctype html>
         members,
         '</div>',
         '<div class="detail-block">',
+        '<p class="detail-label">Attendance Report</p>',
+        '<div class="metric-row">',
+        '<div class="metric"><strong>' + report.activities + '</strong><span>Activities</span></div>',
+        '<div class="metric"><strong>' + report.attendancePercentage + '%</strong><span>Attendance</span></div>',
+        '<div class="metric"><strong>' + report.participationPercentage + '%</strong><span>Participation</span></div>',
+        '</div>',
+        attendanceHistory,
+        '</div>',
+        '<div class="detail-block">',
         '<p class="detail-label">Join Requests</p>',
         requests,
         '</div>',
       ].join("");
     };
 
-    const selectClub = (id) => {
+    const selectClub = async (id) => {
       state.selectedClubId = id;
+      try {
+        await loadAttendance();
+      } catch (error) {
+        showNotice(error.message, true);
+      }
       render();
     };
 
@@ -781,6 +925,39 @@ const renderClubListPage = () => `<!doctype html>
       document.getElementById("joinModal").style.display = "none";
     };
 
+    const openAttendanceModal = (clubId) => {
+      const club = state.clubs.find((item) => item.id === clubId);
+      if (!club) return;
+
+      if (!club.members.length) {
+        showNotice("Add members before recording attendance", true);
+        return;
+      }
+
+      document.getElementById("attendanceForm").reset();
+      document.getElementById("attendanceClubId").value = clubId;
+      document.getElementById("activityDate").value = new Date().toISOString().slice(0, 10);
+      document.getElementById("recordedBy").value = club.leader?.name || "";
+      document.getElementById("attendanceMembers").innerHTML = club.members.map((member, index) => [
+        '<div class="attendance-row">',
+        '<div>',
+        '<strong>' + escapeHtml(member.name) + '</strong>',
+        '<div class="detail-value">' + escapeHtml(member.email || "No email") + '</div>',
+        '</div>',
+        '<select data-member-index="' + index + '">',
+        '<option value="present">Present</option>',
+        '<option value="absent">Absent</option>',
+        '<option value="late">Late</option>',
+        '</select>',
+        '</div>',
+      ].join("")).join("");
+      document.getElementById("attendanceModal").style.display = "flex";
+    };
+
+    const closeAttendanceModal = () => {
+      document.getElementById("attendanceModal").style.display = "none";
+    };
+
     const deleteClub = async (id) => {
       if (!confirm("Delete this club?")) return;
 
@@ -809,13 +986,22 @@ const renderClubListPage = () => `<!doctype html>
     document.getElementById("cancelClubForm").addEventListener("click", closeClubModal);
     document.getElementById("closeJoinModal").addEventListener("click", closeJoinModal);
     document.getElementById("cancelJoinForm").addEventListener("click", closeJoinModal);
+    document.getElementById("closeAttendanceModal").addEventListener("click", closeAttendanceModal);
+    document.getElementById("cancelAttendanceForm").addEventListener("click", closeAttendanceModal);
 
     document.getElementById("searchInput").addEventListener("input", (event) => {
       state.search = event.target.value;
       renderClubGrid();
     });
 
-    roleSelect.addEventListener("change", render);
+    roleSelect.addEventListener("change", async () => {
+      try {
+        await loadAttendance();
+      } catch (error) {
+        showNotice(error.message, true);
+      }
+      render();
+    });
 
     document.getElementById("clubForm").addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -864,6 +1050,42 @@ const renderClubListPage = () => `<!doctype html>
         closeJoinModal();
         showNotice("Join request submitted");
         await loadClubs();
+      } catch (error) {
+        showNotice(error.message, true);
+      }
+    });
+
+    document.getElementById("attendanceForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const clubId = document.getElementById("attendanceClubId").value;
+      const club = state.clubs.find((item) => item.id === clubId);
+      const records = Array.from(document.querySelectorAll("#attendanceMembers select")).map((select) => {
+        const member = club.members[Number(select.dataset.memberIndex)];
+        return {
+          studentName: member.name,
+          studentEmail: member.email,
+          status: select.value,
+        };
+      });
+
+      const payload = {
+        clubId,
+        activityName: document.getElementById("activityName").value.trim(),
+        activityType: document.getElementById("activityType").value,
+        activityDate: document.getElementById("activityDate").value,
+        recordedBy: document.getElementById("recordedBy").value.trim(),
+        records,
+      };
+
+      try {
+        await api("/attendance", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+        closeAttendanceModal();
+        showNotice("Attendance saved");
+        await loadAttendance();
+        render();
       } catch (error) {
         showNotice(error.message, true);
       }

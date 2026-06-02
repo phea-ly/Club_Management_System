@@ -5,7 +5,7 @@ const REVIEW_ACTIONS = {
   reject: "rejected",
 };
 
-const REQUIRED_FIELDS = ["name", "description", "category", "leader"];
+const REQUIRED_FIELDS = ["name", "description", "category"];
 
 class ClubService {
   getClubs() {
@@ -105,9 +105,17 @@ class ClubService {
       (field) => !this.hasText(data?.[field])
     );
 
-    if (hasMissingField) {
+    if (hasMissingField || !this.hasLeaderData(data?.leader)) {
       throw new Error("Club name, description, category, and leader are required");
     }
+  }
+
+  hasLeaderData(leader) {
+    if (this.hasText(leader)) {
+      return true;
+    }
+
+    return Boolean(leader) && this.hasText(leader.name);
   }
 
   buildJoinRequest(student) {
