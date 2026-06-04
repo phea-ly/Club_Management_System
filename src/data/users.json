@@ -1,0 +1,13 @@
+[
+  {
+    "id": "1780577586421",
+    "name": "System Admin",
+    "email": "admin@club.local",
+    "role": "ADMIN",
+    "password": "admin123",
+    "isActive": true,
+    "createdAt": "2026-06-04T12:53:06.413Z",
+    "updatedAt": "2026-06-04T12:53:06.413Z",
+    "passwordResetAt": null
+  }
+]
