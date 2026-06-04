@@ -5,8 +5,11 @@ function authMiddleware(req, res, next) {
     return res.status(401).json({ error: "Unauthorized. Missing X-User-Id header." });
   }
 
+  const role = String(req.header("x-user-role") || "MEMBER").trim().toUpperCase();
+
   req.actorId = actorId;
-  req.isAdmin = req.header("x-user-role") === "ADMIN";
+  req.role = role;
+  req.isAdmin = role === "ADMIN";
   next();
 }
 
