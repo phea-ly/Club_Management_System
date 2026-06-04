@@ -22,7 +22,7 @@ app.use((err, req, res, next) => {
 
 if (require.main === module) {
     app.listen(port, () => {
-        console.log(`Club Management System running on port ${port}`);
+        console.log(`Club Management System running at http://localhost:${port}`);
     });
 }
 
