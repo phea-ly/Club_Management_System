@@ -3,7 +3,7 @@ const { renderSearchPage } = require("../views/search/search_page");
 
 const index = async (req, res, next) => {
     try {
-        const results = await SearchService.searchAll(req.query.q);
+        const results = await SearchService.searchAll(req.query);
         res.send(renderSearchPage(results));
     } catch (error) {
         next(error);
@@ -12,7 +12,7 @@ const index = async (req, res, next) => {
 
 const api = async (req, res, next) => {
     try {
-        const results = await SearchService.searchAll(req.query.q);
+        const results = await SearchService.searchAll(req.query);
         res.json(results);
     } catch (error) {
         next(error);
