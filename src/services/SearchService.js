@@ -6,12 +6,15 @@ const searchAll = async (query) => {
     const normalizedQuery = normalizeQuery(query);
 
     if (!normalizedQuery) {
+        const counts = await SearchRepository.countAll();
+
         return {
             query: "",
+            counts,
             clubs: [],
             members: [],
             events: [],
-            total: 0,
+            total: counts.clubs + counts.members + counts.events,
         };
     }
 
@@ -19,6 +22,7 @@ const searchAll = async (query) => {
 
     return {
         query: normalizedQuery,
+        counts: null,
         ...results,
         total: results.clubs.length + results.members.length + results.events.length,
     };

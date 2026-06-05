@@ -13,7 +13,9 @@ const renderItems = (items, renderItem) => {
     return `<ul class="result-list">${items.map(renderItem).join("")}</ul>`;
 };
 
-const renderSearchPage = ({ query, clubs, members, events, total }) => `<!doctype html>
+const renderCount = (count, label) => `<p class="count">${count} ${label}${count === 1 ? "" : "s"}</p>`;
+
+const renderSearchPage = ({ query, counts, clubs, members, events, total }) => `<!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -36,6 +38,7 @@ const renderSearchPage = ({ query, clubs, members, events, total }) => `<!doctyp
         .title { margin: 0 0 4px; font-weight: 700; }
         .meta { margin: 0; color: #64748b; font-size: 14px; line-height: 1.4; }
         .empty-state { margin: 0; color: #64748b; }
+        .count { margin: 0; color: #2563eb; font-size: 28px; font-weight: 700; }
         @media (max-width: 760px) { form { flex-direction: column; } .grid { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -43,22 +46,22 @@ const renderSearchPage = ({ query, clubs, members, events, total }) => `<!doctyp
     <main>
         <h1>Search</h1>
         <form action="/search" method="get">
-            <input type="search" name="q" value="${escapeHtml(query)}" placeholder="Search clubs, members, or events" aria-label="Search clubs, members, or events">
+            <input type="search" name="q" value="${escapeHtml(query)}" placeholder="Search by club, member, or event name" aria-label="Search by club, member, or event name">
             <button type="submit">Search</button>
         </form>
-        ${query ? `<p class="summary">${total} result${total === 1 ? "" : "s"} for "${escapeHtml(query)}"</p>` : '<p class="summary">Enter a club, member, or event name to search.</p>'}
+        ${query ? `<p class="summary">${total} result${total === 1 ? "" : "s"} for "${escapeHtml(query)}"</p>` : `<p class="summary">Search by name to view matching database records.</p>`}
         <div class="grid">
             <section>
                 <h2>Clubs</h2>
-                ${renderItems(clubs, (club) => `<li><p class="title">${escapeHtml(club.name)}</p><p class="meta">${escapeHtml(club.category || "Uncategorized")}</p><p class="meta">${escapeHtml(club.description || "")}</p></li>`)}
+                ${query ? renderItems(clubs, (club) => `<li><p class="title">${escapeHtml(club.name)}</p><p class="meta">${escapeHtml(club.category || "Uncategorized")}</p><p class="meta">${escapeHtml(club.description || "")}</p></li>`) : renderCount(counts.clubs, "club")}
             </section>
             <section>
                 <h2>Members</h2>
-                ${renderItems(members, (member) => `<li><p class="title">${escapeHtml(member.name)}</p><p class="meta">${escapeHtml(member.email || "No email")}</p><p class="meta">${escapeHtml(member.status || "No status")}</p></li>`)}
+                ${query ? renderItems(members, (member) => `<li><p class="title">${escapeHtml(member.name)}</p><p class="meta">${escapeHtml(member.email || "No email")}</p><p class="meta">${escapeHtml(member.status || "No status")}</p></li>`) : renderCount(counts.members, "member")}
             </section>
             <section>
                 <h2>Events</h2>
-                ${renderItems(events, (event) => `<li><p class="title">${escapeHtml(event.title)}</p><p class="meta">${escapeHtml(event.event_date || "No date")}</p><p class="meta">${escapeHtml(event.location || "No location")}</p></li>`)}
+                ${query ? renderItems(events, (event) => `<li><p class="title">${escapeHtml(event.title)}</p><p class="meta">${escapeHtml(event.event_date || "No date")}</p><p class="meta">${escapeHtml(event.location || "No location")}</p></li>`) : renderCount(counts.events, "event")}
             </section>
         </div>
     </main>
