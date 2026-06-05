@@ -105,9 +105,17 @@ class ClubService {
     const hasMissingField = REQUIRED_FIELDS.some((field) => !this.hasText(data?.[field]));
     const hasMissingLeader = !data?.leader || !this.hasText(data.leader.name);
 
-    if (hasMissingField || hasMissingLeader) {
-      throw new Error("Club name, description, category, and leader name are required");
+    if (hasMissingField || !this.hasLeaderData(data?.leader)) {
+      throw new Error("Club name, description, category, and leader are required");
     }
+  }
+
+  hasLeaderData(leader) {
+    if (this.hasText(leader)) {
+      return true;
+    }
+
+    return Boolean(leader) && this.hasText(leader.name);
   }
 
   buildJoinRequest(student) {
