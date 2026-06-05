@@ -1,7 +1,7 @@
 const userRepository = require("../repositories/UserRepository");
 const { normalizeRole } = require("../middlewares/roleMiddleware");
 
-const VALID_ROLES = ["SUPER_ADMIN", "ADMIN", "STAFF", "LEADER", "STUDENT"];
+const VALID_ROLES = ["ADMIN", "LEADER", "MEMBER"];
 
 class UserService {
   getUsers() {

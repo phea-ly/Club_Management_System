@@ -592,17 +592,15 @@ const renderDashboardPage = () => `<!doctype html>
           <p class="eyebrow">Admin Dashboard</p>
           <h2>Reports and Dashboard</h2>
           <p>
-            Track club growth, member participation, activity reports, and staff access from one focused workspace.
+            Track club growth, member participation, activity reports, and account access from one focused workspace.
           </p>
         </div>
 
         <div class="toolbar">
           <select class="pill" id="roleSelect" aria-label="Current role">
-            <option value="SUPER_ADMIN">SUPER_ADMIN</option>
             <option value="ADMIN" selected>ADMIN</option>
-            <option value="STAFF">STAFF</option>
             <option value="LEADER">LEADER</option>
-            <option value="STUDENT">STUDENT</option>
+            <option value="MEMBER">MEMBER</option>
           </select>
           <button class="btn secondary" id="refreshBtn" type="button">Refresh</button>
         </div>
@@ -627,7 +625,7 @@ const renderDashboardPage = () => `<!doctype html>
         </a>
         <a class="quick-card" href="#staffPanel">
           <div>
-            <strong>Manage Staff</strong>
+            <strong>Manage Users</strong>
             <span>Create users, set roles, and reset passwords.</span>
           </div>
           <span class="quick-mark">S</span>
@@ -680,23 +678,23 @@ const renderDashboardPage = () => `<!doctype html>
           <article class="panel" id="staffPanel">
             <div class="panel-header">
               <div>
-                <h3>Staff Provisioning</h3>
-                <p>Restricted to SUPER_ADMIN and ADMIN profiles.</p>
+                <h3>User Provisioning</h3>
+                <p>Restricted to ADMIN profiles.</p>
               </div>
             </div>
             <div class="panel-body">
               <p class="panel-note" id="staffAccessNote">
-                Create staff accounts, assign roles, and issue temporary passwords.
+                Create user accounts, assign roles, and issue temporary passwords.
               </p>
 
               <form id="provisionForm" class="form-grid" autocomplete="off">
                 <div class="form-field">
                   <label for="name">Name</label>
-                  <input id="name" placeholder="Staff name" required>
+                  <input id="name" placeholder="User name" required>
                 </div>
                 <div class="form-field">
                   <label for="email">Email</label>
-                  <input id="email" type="email" placeholder="staff@example.edu" required>
+                  <input id="email" type="email" placeholder="user@example.edu" required>
                 </div>
                 <div class="form-field">
                   <label for="password">Password</label>
@@ -705,11 +703,9 @@ const renderDashboardPage = () => `<!doctype html>
                 <div class="form-field">
                   <label for="role">Role</label>
                   <select id="role">
-                    <option value="STAFF">STAFF</option>
-                    <option value="LEADER">LEADER</option>
-                    <option value="STUDENT">STUDENT</option>
                     <option value="ADMIN">ADMIN</option>
-                    <option value="SUPER_ADMIN">SUPER_ADMIN</option>
+                    <option value="LEADER">LEADER</option>
+                    <option value="MEMBER">MEMBER</option>
                   </select>
                 </div>
                 <div class="form-field full actions">
@@ -760,7 +756,7 @@ const renderDashboardPage = () => `<!doctype html>
     };
 
     const isPrivilegedRole = () => {
-      return ["SUPER_ADMIN", "ADMIN"].includes(roleSelect.value);
+      return roleSelect.value === "ADMIN";
     };
 
     const api = async (url, options = {}) => {
@@ -859,14 +855,14 @@ const renderDashboardPage = () => `<!doctype html>
     const renderUsers = () => {
       const privileged = isPrivilegedRole();
       staffAccessNote.textContent = privileged
-        ? "Create staff accounts, assign roles, and issue temporary passwords."
-        : "Staff administration is unavailable for this role.";
+        ? "Create user accounts, assign roles, and issue temporary passwords."
+        : "User administration is unavailable for this role.";
 
       if (!privileged) {
         usersContainer.innerHTML = [
           '<div class="empty">',
           '<strong>Access restricted</strong>',
-          '<span>Switch to SUPER_ADMIN or ADMIN to manage users.</span>',
+          '<span>Switch to ADMIN to manage users.</span>',
           '</div>',
         ].join("");
         document.getElementById("provisionForm").style.display = "none";
@@ -880,7 +876,7 @@ const renderDashboardPage = () => `<!doctype html>
         usersContainer.innerHTML = [
           '<div class="empty">',
           '<strong>No provisioned users</strong>',
-          '<span>New staff and leader accounts will appear here.</span>',
+          '<span>New admin, leader, and member accounts will appear here.</span>',
           '</div>',
         ].join("");
         document.getElementById("userCountTag").textContent = "0 users";
@@ -903,11 +899,9 @@ const renderDashboardPage = () => `<!doctype html>
           '<div class="form-field">',
           '<label>Explicit role</label>',
           '<select data-role-user="' + escapeHtml(user.id) + '">',
-          '<option value="STAFF" ' + (user.role === "STAFF" ? "selected" : "") + '>STAFF</option>',
-          '<option value="LEADER" ' + (user.role === "LEADER" ? "selected" : "") + '>LEADER</option>',
-          '<option value="STUDENT" ' + (user.role === "STUDENT" ? "selected" : "") + '>STUDENT</option>',
           '<option value="ADMIN" ' + (user.role === "ADMIN" ? "selected" : "") + '>ADMIN</option>',
-          '<option value="SUPER_ADMIN" ' + (user.role === "SUPER_ADMIN" ? "selected" : "") + '>SUPER_ADMIN</option>',
+          '<option value="LEADER" ' + (user.role === "LEADER" ? "selected" : "") + '>LEADER</option>',
+          '<option value="MEMBER" ' + (user.role === "MEMBER" ? "selected" : "") + '>MEMBER</option>',
           '</select>',
           '</div>',
           '<div class="form-field">',
@@ -1015,7 +1009,7 @@ const renderDashboardPage = () => `<!doctype html>
       event.preventDefault();
 
       if (!isPrivilegedRole()) {
-        showNotice("Only SUPER_ADMIN or ADMIN can provision users", true);
+        showNotice("Only ADMIN can provision users", true);
         return;
       }
 
@@ -1033,7 +1027,7 @@ const renderDashboardPage = () => `<!doctype html>
         });
 
         event.target.reset();
-        document.getElementById("role").value = "STAFF";
+        document.getElementById("role").value = "MEMBER";
         showNotice("User provisioned successfully");
         await loadUsers();
       } catch (error) {

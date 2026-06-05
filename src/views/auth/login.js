@@ -114,7 +114,7 @@ const renderLoginPage = (message = "", redirect = "/dashboard") => `<!doctype ht
 <body>
   <main>
     <h1>Club Management</h1>
-    <p>Sign in to manage attendance, clubs, reports, and staff access.</p>
+    <p>Sign in to manage attendance, clubs, reports, and user access.</p>
     ${message ? `<div class="message">${escapeHtml(message)}</div>` : ""}
     <form method="post" action="/login">
       <input name="redirect" type="hidden" value="${escapeHtml(redirect)}">

@@ -498,9 +498,9 @@ const renderClubListPage = () => `<!doctype html>
         </div>
         <div class="toolbar">
           <select id="roleSelect" aria-label="Current role">
-            <option value="admin">Admin</option>
-            <option value="leader">Leader</option>
-            <option value="student">Student</option>
+            <option value="ADMIN">Admin</option>
+            <option value="LEADER">Leader</option>
+            <option value="MEMBER">Member</option>
           </select>
           <button class="btn" id="newClubBtn" type="button">+ New Club</button>
         </div>
@@ -706,7 +706,7 @@ const renderClubListPage = () => `<!doctype html>
     };
 
     const loadAttendance = async () => {
-      if (!state.selectedClubId || roleSelect.value === "student") {
+      if (!state.selectedClubId || roleSelect.value === "MEMBER") {
         state.attendance = [];
         state.attendanceReport = null;
         return;
@@ -730,7 +730,7 @@ const renderClubListPage = () => `<!doctype html>
       renderClubGrid();
       renderDetails();
       document.getElementById("newClubBtn").style.display =
-        roleSelect.value === "student" ? "none" : "inline-flex";
+        roleSelect.value === "MEMBER" ? "none" : "inline-flex";
     };
 
     const renderClubGrid = () => {
@@ -743,7 +743,7 @@ const renderClubListPage = () => `<!doctype html>
 
       clubGrid.innerHTML = clubs
         .map((club) => {
-          const managerActions = roleSelect.value === "student"
+          const managerActions = roleSelect.value === "MEMBER"
             ? ""
             : '<button class="btn small secondary" type="button" onclick="openEditModal(\\'' + club.id + '\\')">Edit</button>' +
               '<button class="btn small danger" type="button" onclick="deleteClub(\\'' + club.id + '\\')">Delete</button>';
@@ -794,7 +794,7 @@ const renderClubListPage = () => `<!doctype html>
 
       const requests = club.joinRequests.length
         ? club.joinRequests.map((request) => {
-            const reviewActions = roleSelect.value === "student" || request.status !== "pending"
+            const reviewActions = roleSelect.value === "MEMBER" || request.status !== "pending"
               ? ""
               : [
                   '<div class="card-actions">',
@@ -814,7 +814,7 @@ const renderClubListPage = () => `<!doctype html>
           }).join("")
         : '<p class="detail-value">No join requests.</p>';
 
-      const managerAttendanceAction = roleSelect.value === "student"
+      const managerAttendanceAction = roleSelect.value === "MEMBER"
         ? ""
         : '<button class="btn small" type="button" onclick="openAttendanceModal(\\'' + club.id + '\\')">Take Attendance</button>';
 

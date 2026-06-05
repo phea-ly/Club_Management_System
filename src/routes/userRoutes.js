@@ -3,7 +3,7 @@ const userController = require("../controllers/UserController");
 const { allowRoles } = require("../middlewares/roleMiddleware");
 
 const router = express.Router();
-const allowUserAdministration = allowRoles("SUPER_ADMIN", "ADMIN");
+const allowUserAdministration = allowRoles("ADMIN");
 
 router.get("/", allowUserAdministration, userController.getUsers);
 router.post("/", allowUserAdministration, userController.provisionUser);
