@@ -1,5 +1,8 @@
 const { bootstrap } = require("./src/app");
 const env = require("./src/config/env");
+require("./src/config/env");
+
+const app = require("./src/app");
 
 const port = env.port || 3000;
 

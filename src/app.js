@@ -1,6 +1,7 @@
 const express = require("express");
 const userRoutes = require("./routes/userRoutes");
 const profileRoutes = require("./routes/profileRoutes");
+const clubRoutes = require("./routes/clubRoutes");
 const userRepository = require("./repositories/UserRepository");
 
 const app = express();
@@ -14,6 +15,7 @@ app.get("/", (req, res) => {
 
 app.use("/users", userRoutes);
 app.use("/profile", profileRoutes);
+app.use("/clubs", clubRoutes);
 
 app.use((req, res) => {
     res.status(404).send("<h1>404</h1><p>Page not found</p><a href='/users'>Back to users</a>");
