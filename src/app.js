@@ -1,6 +1,7 @@
 const express = require("express");
 const clubRoutes = require("./routes/clubRoutes");
-const renderClubListPage = require("./views/clubs/club_list");
+const dashboardRoutes = require("./routes/dashboardRoutes");
+const attendanceRoutes = require("./routes/attendanceRoutes");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -9,14 +10,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
-  res.redirect("/club-management");
-});
-
-app.get("/club-management", (req, res) => {
-  res.send(renderClubListPage());
+  res.json({
+    message: "Club Management System API",
+    routes: {
+      clubs: "/clubs",
+      dashboard: "/dashboard/statistics",
+      attendance: "/attendance",
+    },
+  });
 });
 
 app.use("/clubs", clubRoutes);
+app.use("/dashboard", dashboardRoutes);
+app.use("/attendance", attendanceRoutes);
 
 if (require.main === module) {
   app.listen(port, () => {
