@@ -1,6 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const userRoutes = require("./routes/userRoutes");
+const clubRoutes = require("./routes/clubRoutes");
 const errorMiddleware = require("./core/middlewares/errorMiddleware");
 
 dotenv.config();
@@ -15,6 +16,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/users", userRoutes);
+app.use("/api/clubs", clubRoutes);
 
 app.use(errorMiddleware);
 
