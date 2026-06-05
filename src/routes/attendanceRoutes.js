@@ -20,27 +20,27 @@ const allowRoles = (...roles) => {
 
 router.get(
   "/",
-  allowRoles("admin", "leader"),
+  allowRoles("admin", "club_leader", "leader"),
   attendanceController.getAttendanceHistory
 );
 router.get(
   "/reports",
-  allowRoles("admin", "leader"),
+  allowRoles("admin", "club_leader", "leader"),
   attendanceController.getReport
 );
 router.get(
   "/students/:studentKey",
-  allowRoles("admin", "leader"),
+  allowRoles("admin", "club_leader", "leader"),
   attendanceController.getStudentHistory
 );
 router.get(
   "/:id",
-  allowRoles("admin", "leader"),
+  allowRoles("admin", "club_leader", "leader"),
   attendanceController.getAttendanceById
 );
 router.post(
   "/",
-  allowRoles("admin", "leader"),
+  allowRoles("admin", "club_leader", "leader"),
   attendanceController.recordAttendance
 );
 

@@ -2,6 +2,8 @@ const express = require("express");
 const userRoutes = require("./routes/userRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const clubRoutes = require("./routes/clubRoutes");
+const memberRoutes = require("./routes/memberRoutes");
+const eventRoutes = require("./routes/eventRoutes");
 const userRepository = require("./repositories/UserRepository");
 const attendanceRoutes = require("./routes/attendanceRoutes");
 
@@ -20,6 +22,8 @@ app.get("/", (req, res) => {
 app.use("/users", userRoutes);
 app.use("/profile", profileRoutes);
 app.use("/clubs", clubRoutes);
+app.use("/members", memberRoutes);
+app.use("/events", eventRoutes);
 app.use("/attendance", attendanceRoutes);
 
 app.use((req, res) => {
