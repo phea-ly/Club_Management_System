@@ -1,24 +1,11 @@
 const express = require("express");
 const attendanceController = require("../controllers/AttendanceController");
 const { allowRoles } = require("../middlewares/roleMiddleware");
-const renderAttendancePage = require("../views/attendance/attendance");
 
 const router = express.Router();
 const allowAttendance = allowRoles("ADMIN", "LEADER");
 
-router.get(
-  "/",
-  allowAttendance,
-  (req, res, next) => {
-    if (req.accepts("html") && !req.accepts("json")) {
-      res.send(renderAttendancePage());
-      return;
-    }
-
-    next();
-  },
-  attendanceController.getAttendanceHistory
-);
+router.get("/", allowAttendance, attendanceController.getAttendanceHistory);
 router.get(
   "/history",
   allowAttendance,

@@ -13,10 +13,6 @@ const allowRoles = (...roles) => {
     const currentRole = normalizeRole(req.userRole || req.headers["x-user-role"]);
 
     if (!allowedRoles.includes(currentRole)) {
-      if (!currentRole && req.accepts("html")) {
-        return res.redirect(`/login?redirect=${encodeURIComponent(req.originalUrl || req.url)}`);
-      }
-
       return res.status(403).json({
         success: false,
         message: `Only ${allowedRoles.join(" or ")} can access this action`,

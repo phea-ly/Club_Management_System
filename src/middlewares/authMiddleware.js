@@ -47,11 +47,6 @@ const requireLogin = (req, res, next) => {
     return;
   }
 
-  if (req.accepts("html")) {
-    res.redirect("/login");
-    return;
-  }
-
   res.status(401).json({
     success: false,
     message: "Please log in to access this action",

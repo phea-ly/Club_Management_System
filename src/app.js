@@ -6,8 +6,6 @@ const attendanceRoutes = require("./routes/attendanceRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const userRoutes = require("./routes/userRoutes");
 const { attachUser } = require("./middlewares/authMiddleware");
-const renderDashboardPage = require("./views/dashboard/dashboard");
-const renderClubListPage = require("./views/clubs/club_list");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -18,15 +16,10 @@ app.use(attachUser);
 app.use(authRoutes);
 
 app.get("/", (req, res) => {
-  res.redirect("/dashboard");
-});
-
-app.get("/dashboard", (req, res) => {
-  res.send(renderDashboardPage());
-});
-
-app.get("/club-management", (req, res) => {
-  res.send(renderClubListPage());
+  res.json({
+    success: true,
+    message: "Club Management API is running",
+  });
 });
 
 app.use("/clubs", clubRoutes);
