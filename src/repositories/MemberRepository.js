@@ -1,98 +1,198 @@
-const db = require("../config/db");
+const pool = require("../config/db");
+const MemberModel = require("../models/MemberModel");
 
 class MemberRepository {
   async findMembersByClub(clubId, status = "") {
-    let sql = `
-      SELECT
-        cm.id,
-        cm.user_id,
-        cm.club_id,
-        cm.status,
-        cm.joined_at,
-        u.first_name,
-        u.last_name,
-        u.email,
-        COUNT(DISTINCT er.id) AS registered_event_count,
-        COUNT(DISTINCT CASE WHEN a.status = 'PRESENT' THEN a.id END) AS attended_event_count,
-        COUNT(DISTINCT CASE WHEN a.status = 'ABSENT' THEN a.id END) AS absent_event_count
-      FROM club_members cm
-      JOIN users u ON u.id = cm.user_id
-      LEFT JOIN events e ON e.club_id = cm.club_id
-      LEFT JOIN event_registrations er ON er.event_id = e.id AND er.user_id = cm.user_id
-      LEFT JOIN attendance a ON a.event_id = e.id AND a.user_id = cm.user_id
-      WHERE cm.club_id = ?
-    `;
-    const params = [clubId];
-
-    if (status) {
-      sql += " AND cm.status = ?";
-      params.push(status);
+    try {
+      let query = `
+        SELECT 
+          cm.id, 
+          cm.user_id, 
+          cm.club_id, 
+          cm.status, 
+          cm.joined_at,
+          u.first_name,
+          u.last_name,
+          u.email,
+          COALESCE(registered_count.count, 0) as registered_event_count,
+          COALESCE(attended_count.count, 0) as attended_event_count,
+          COALESCE(absent_count.count, 0) as absent_event_count
+        FROM club_members cm
+        JOIN users u ON cm.user_id = u.id
+        LEFT JOIN (
+          SELECT user_id, COUNT(*) as count 
+          FROM attendance 
+          WHERE club_id = ?
+          GROUP BY user_id
+        ) registered_count ON cm.user_id = registered_count.user_id
+        LEFT JOIN (
+          SELECT user_id, COUNT(*) as count 
+          FROM attendance 
+          WHERE club_id = ? AND participation_status = 'PRESENT'
+          GROUP BY user_id
+        ) attended_count ON cm.user_id = attended_count.user_id
+        LEFT JOIN (
+          SELECT user_id, COUNT(*) as count 
+          FROM attendance 
+          WHERE club_id = ? AND participation_status = 'ABSENT'
+          GROUP BY user_id
+        ) absent_count ON cm.user_id = absent_count.user_id
+        WHERE cm.club_id = ?
+      `;
+      
+      const params = [clubId, clubId, clubId, clubId];
+      
+      if (status) {
+        query += ` AND cm.status = ?`;
+        params.push(status);
+      }
+      
+      const [rows] = await pool.execute(query, params);
+      return rows.map(row => this.formatMember(row));
+    } catch (error) {
+      console.error('Error finding members by club:', error);
+      throw error;
     }
-
-    sql += `
-      GROUP BY cm.id, cm.user_id, cm.club_id, cm.status, cm.joined_at, u.first_name, u.last_name, u.email
-      ORDER BY cm.joined_at DESC
-    `;
-
-    const [rows] = await db.query(sql, params);
-    return rows;
   }
 
   async findById(id) {
-    const [rows] = await db.query("SELECT * FROM club_members WHERE id = ?", [id]);
-    return rows[0] || null;
+    try {
+      const [rows] = await pool.execute(`
+        SELECT 
+          cm.id, 
+          cm.user_id, 
+          cm.club_id, 
+          cm.status, 
+          cm.joined_at,
+          u.first_name,
+          u.last_name,
+          u.email,
+          COALESCE(registered_count.count, 0) as registered_event_count,
+          COALESCE(attended_count.count, 0) as attended_event_count,
+          COALESCE(absent_count.count, 0) as absent_event_count
+        FROM club_members cm
+        JOIN users u ON cm.user_id = u.id
+        LEFT JOIN (
+          SELECT user_id, COUNT(*) as count 
+          FROM attendance 
+          WHERE club_id = cm.club_id
+          GROUP BY user_id
+        ) registered_count ON cm.user_id = registered_count.user_id
+        LEFT JOIN (
+          SELECT user_id, COUNT(*) as count 
+          FROM attendance 
+          WHERE club_id = cm.club_id AND participation_status = 'PRESENT'
+          GROUP BY user_id
+        ) attended_count ON cm.user_id = attended_count.user_id
+        LEFT JOIN (
+          SELECT user_id, COUNT(*) as count 
+          FROM attendance 
+          WHERE club_id = cm.club_id AND participation_status = 'ABSENT'
+          GROUP BY user_id
+        ) absent_count ON cm.user_id = absent_count.user_id
+        WHERE cm.id = ?
+      `, [id]);
+      
+      return rows.length > 0 ? this.formatMember(rows[0]) : null;
+    } catch (error) {
+      console.error('Error finding member by id:', error);
+      throw error;
+    }
   }
 
   async findByUserAndClub(userId, clubId) {
-    const [rows] = await db.query(
-      "SELECT * FROM club_members WHERE user_id = ? AND club_id = ?",
-      [userId, clubId]
-    );
-    return rows[0] || null;
+    try {
+      const [rows] = await pool.execute(
+        'SELECT * FROM club_members WHERE user_id = ? AND club_id = ?',
+        [userId, clubId]
+      );
+      return rows.length > 0 ? rows[0] : null;
+    } catch (error) {
+      console.error('Error finding member by user and club:', error);
+      throw error;
+    }
   }
 
   async create(member) {
-    await db.execute(
-      "INSERT INTO club_members (id, user_id, club_id, status, joined_at) VALUES (?, ?, ?, ?, ?)",
-      [member.id, member.user_id, member.club_id, member.status, member.joined_at]
-    );
-    return member;
+    try {
+      const { id, user_id, club_id, status, joined_at } = member;
+      await pool.execute(
+        'INSERT INTO club_members (id, user_id, club_id, status, joined_at) VALUES (?, ?, ?, ?, ?)',
+        [id, user_id, club_id, status, joined_at]
+      );
+      
+      // Fetch the created member with summary
+      return this.findById(id);
+    } catch (error) {
+      console.error('Error creating member:', error);
+      throw error;
+    }
   }
 
   async updateStatus(id, status) {
-    const [result] = await db.execute(
-      "UPDATE club_members SET status = ? WHERE id = ?",
-      [status, id]
-    );
-    return result.affectedRows > 0;
+    try {
+      const [result] = await pool.execute(
+        'UPDATE club_members SET status = ? WHERE id = ?',
+        [status, id]
+      );
+      return result.affectedRows > 0;
+    } catch (error) {
+      console.error('Error updating member status:', error);
+      throw error;
+    }
   }
 
   async deleteById(id) {
-    const [result] = await db.execute("DELETE FROM club_members WHERE id = ?", [id]);
-    return result.affectedRows > 0;
+    try {
+      const [result] = await pool.execute(
+        'DELETE FROM club_members WHERE id = ?',
+        [id]
+      );
+      return result.affectedRows > 0;
+    } catch (error) {
+      console.error('Error deleting member:', error);
+      throw error;
+    }
   }
 
   async findParticipationByMember(clubId, userId) {
-    const [rows] = await db.query(
-      `
-      SELECT
-        e.id AS event_id,
-        e.title,
-        e.event_date,
-        e.location,
-        er.created_at AS registered_at,
-        COALESCE(a.status, 'REGISTERED') AS participation_status,
-        a.recorded_at
-      FROM events e
-      LEFT JOIN event_registrations er ON er.event_id = e.id AND er.user_id = ?
-      LEFT JOIN attendance a ON a.event_id = e.id AND a.user_id = ?
-      WHERE e.club_id = ?
-        AND (er.id IS NOT NULL OR a.id IS NOT NULL)
-      ORDER BY e.event_date DESC
-      `,
-      [userId, userId, clubId]
-    );
-    return rows;
+    try {
+      const [rows] = await pool.execute(`
+        SELECT 
+          a.event_id,
+          e.title,
+          e.event_date,
+          e.location,
+          a.registered_at,
+          a.participation_status,
+          a.recorded_at
+        FROM attendance a
+        JOIN events e ON a.event_id = e.id
+        WHERE a.club_id = ? AND a.user_id = ?
+        ORDER BY e.event_date DESC
+      `, [clubId, userId]);
+      
+      return rows;
+    } catch (error) {
+      console.error('Error finding participation:', error);
+      throw error;
+    }
+  }
+
+  formatMember(row) {
+    return {
+      id: row.id,
+      user_id: row.user_id,
+      club_id: row.club_id,
+      status: row.status,
+      joined_at: row.joined_at,
+      first_name: row.first_name,
+      last_name: row.last_name,
+      email: row.email,
+      registered_event_count: row.registered_event_count || 0,
+      attended_event_count: row.attended_event_count || 0,
+      absent_event_count: row.absent_event_count || 0,
+    };
   }
 }
 

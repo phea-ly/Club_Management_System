@@ -78,7 +78,7 @@ class MemberService {
     const updated = await this.memberRepository.updateStatus(memberId, status);
     if (!updated) throw new AppError(500, "Failed to update member status.");
 
-    return { id: memberId, status };
+    return this.memberRepository.findById(memberId);
   }
 
   async removeMember(req) {
