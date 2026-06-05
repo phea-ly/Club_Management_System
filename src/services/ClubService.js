@@ -8,12 +8,12 @@ const REVIEW_ACTIONS = {
 const REQUIRED_FIELDS = ["name", "description", "category"];
 
 class ClubService {
-  getClubs() {
+  async getClubs() {
     return clubRepository.findActive();
   }
 
-  getClubById(id) {
-    const club = clubRepository.findById(id);
+  async getClubById(id) {
+    const club = await clubRepository.findById(id);
 
     if (!club || !club.isActive) {
       throw new Error("Club not found");
@@ -22,7 +22,7 @@ class ClubService {
     return club;
   }
 
-  createClub(data) {
+  async createClub(data) {
     this.validateClubData(data);
 
     return clubRepository.create({
@@ -34,8 +34,8 @@ class ClubService {
     });
   }
 
-  updateClub(id, data = {}) {
-    const existingClub = this.getClubById(id);
+  async updateClub(id, data = {}) {
+    const existingClub = await this.getClubById(id);
 
     return clubRepository.update(existingClub.id, {
       name: data.name ?? existingClub.name,
@@ -46,13 +46,13 @@ class ClubService {
     });
   }
 
-  deleteClub(id) {
-    const existingClub = this.getClubById(id);
+  async deleteClub(id) {
+    const existingClub = await this.getClubById(id);
     return clubRepository.delete(existingClub.id);
   }
 
-  requestToJoin(clubId, student) {
-    const club = this.getClubById(clubId);
+  async requestToJoin(clubId, student) {
+    const club = await this.getClubById(clubId);
 
     if (!student || !this.hasText(student.name)) {
       throw new Error("Student name is required");
@@ -69,16 +69,17 @@ class ClubService {
     const joinRequest = this.buildJoinRequest(student);
 
     club.joinRequests.push(joinRequest);
-    clubRepository.update(club.id, club);
+    await clubRepository.update(club.id, club);
     return joinRequest;
   }
 
-  getJoinRequests(clubId) {
-    return this.getClubById(clubId).joinRequests;
+  async getJoinRequests(clubId) {
+    const club = await this.getClubById(clubId);
+    return club.joinRequests;
   }
 
-  reviewJoinRequest(clubId, requestId, action) {
-    const club = this.getClubById(clubId);
+  async reviewJoinRequest(clubId, requestId, action) {
+    const club = await this.getClubById(clubId);
     const request = club.joinRequests.find((item) => item.id === requestId);
 
     if (!request) {
@@ -96,7 +97,7 @@ class ClubService {
       this.addMemberFromRequest(club, request);
     }
 
-    clubRepository.update(club.id, club);
+    await clubRepository.update(club.id, club);
     return request;
   }
 

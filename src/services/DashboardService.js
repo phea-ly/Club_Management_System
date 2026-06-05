@@ -2,8 +2,8 @@ const clubService = require("./ClubService");
 const attendanceService = require("./AttendanceService");
 
 class DashboardService {
-  getStatistics() {
-    const clubs = clubService.getClubs();
+  async getStatistics() {
+    const clubs = await clubService.getClubs();
     const attendanceReport = attendanceService.getReport();
 
     return {

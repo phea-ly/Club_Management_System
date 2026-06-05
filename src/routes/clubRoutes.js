@@ -20,7 +20,7 @@ const allowRoles = (...roles) => {
 
 router.get("/", clubController.getClubs);
 router.get("/:id", clubController.getClubById);
-router.post("/", allowRoles("admin", "leader"), clubController.createClub);
+router.post("/create", allowRoles("admin", "leader"), clubController.createClub);
 router.put("/:id", allowRoles("admin", "leader"), clubController.updateClub);
 router.delete("/:id", allowRoles("admin", "leader"), clubController.deleteClub);
 
