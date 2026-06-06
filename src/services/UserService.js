@@ -13,8 +13,22 @@ class PasswordService {
     }
 
     async verify(password, storedHash) {
+        if (typeof storedHash !== "string" || !storedHash.includes(":")) {
+            return false;
+        }
+
         const [salt, hash] = storedHash.split(":");
+
+        if (!salt || !hash) {
+            return false;
+        }
+
         const currentHash = await this.#pbkdf2(password, salt);
+
+        if (hash.length !== currentHash.length) {
+            return false;
+        }
+
         return crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(currentHash));
     }
 

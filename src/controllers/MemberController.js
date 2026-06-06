@@ -16,7 +16,7 @@ class MemberController extends AbstractController {
                 this.memberService.getClubs(),
             ]);
 
-            return res.send(memberListView({ members, clubs, filters: req.query }));
+            return res.send(memberListView({ members, clubs, filters: req.query, currentUser: req.user }));
         } catch (error) {
             return this.handleError(res, error);
         }
@@ -31,6 +31,7 @@ class MemberController extends AbstractController {
                 member: { clubId: req.query.clubId || "", status: "active", participationCount: 0 },
                 title: "Create Member",
                 action: "/members",
+                currentUser: req.user,
             }));
         } catch (error) {
             return this.handleError(res, error);
@@ -59,6 +60,7 @@ class MemberController extends AbstractController {
                 member,
                 title: "Edit Member",
                 action: `/members/${member.id}`,
+                currentUser: req.user,
             }));
         } catch (error) {
             return this.handleError(res, error);

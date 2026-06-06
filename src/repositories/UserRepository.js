@@ -34,7 +34,7 @@ class UserRepository extends AbstractRepository {
     }
 
     async findByEmail(email) {
-        const [rows] = await pool.query("SELECT * FROM users WHERE email = ?", [email]);
+        const [rows] = await pool.query("SELECT * FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1", [email]);
         return rows[0] || null;
     }
 

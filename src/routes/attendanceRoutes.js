@@ -1,47 +1,16 @@
 const express = require("express");
 const attendanceController = require("../controllers/AttendanceController");
+const { requireAuth } = require("../middlewares/authMiddleware");
+const { requireRoles } = require("../middlewares/roleMiddleware");
 
 const router = express.Router();
 
-const allowRoles = (...roles) => {
-  return (req, res, next) => {
-    const role = req.headers["x-user-role"];
+router.use(requireAuth, requireRoles("admin", "club_leader"));
 
-    if (!roles.includes(role)) {
-      return res.status(403).json({
-        success: false,
-        message: `Only ${roles.join(" or ")} can access this action`,
-      });
-    }
-
-    next();
-  };
-};
-
-router.get(
-  "/",
-  allowRoles("admin", "club_leader", "leader"),
-  attendanceController.getAttendanceHistory
-);
-router.get(
-  "/reports",
-  allowRoles("admin", "club_leader", "leader"),
-  attendanceController.getReport
-);
-router.get(
-  "/students/:studentKey",
-  allowRoles("admin", "club_leader", "leader"),
-  attendanceController.getStudentHistory
-);
-router.get(
-  "/:id",
-  allowRoles("admin", "club_leader", "leader"),
-  attendanceController.getAttendanceById
-);
-router.post(
-  "/",
-  allowRoles("admin", "club_leader", "leader"),
-  attendanceController.recordAttendance
-);
+router.get("/", attendanceController.getAttendanceHistory);
+router.get("/reports", attendanceController.getReport);
+router.get("/students/:studentKey", attendanceController.getStudentHistory);
+router.get("/:id", attendanceController.getAttendanceById);
+router.post("/", attendanceController.recordAttendance);
 
 module.exports = router;

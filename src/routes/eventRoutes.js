@@ -1,28 +1,18 @@
 const express = require("express");
 const eventController = require("../controllers/EventController");
+const { requireAuth } = require("../middlewares/authMiddleware");
+const { requireRoles } = require("../middlewares/roleMiddleware");
 
 const router = express.Router();
 
-const allowRoles = (...roles) => {
-    return (req, res, next) => {
-        const role = req.headers["x-user-role"];
+router.use(requireAuth);
 
-        if (!roles.includes(role)) {
-            return res.status(403).json({
-                success: false,
-                message: `Only ${roles.join(" or ")} can access this action`,
-            });
-        }
-
-        next();
-    };
-};
-
-router.get("/", allowRoles("admin", "club_leader", "leader"), eventController.index);
-router.get("/new", allowRoles("admin", "club_leader", "leader"), eventController.createForm);
-router.post("/", allowRoles("admin", "club_leader", "leader"), eventController.store);
-router.get("/:id/edit", allowRoles("admin", "club_leader", "leader"), eventController.editForm);
-router.post("/:id", allowRoles("admin", "club_leader", "leader"), eventController.update);
-router.post("/:id/delete", allowRoles("admin", "club_leader", "leader"), eventController.destroy);
+router.get("/", requireRoles("admin", "club_leader", "member"), eventController.index);
+router.get("/new", requireRoles("admin", "club_leader"), eventController.createForm);
+router.post("/", requireRoles("admin", "club_leader"), eventController.store);
+router.get("/:id/edit", requireRoles("admin", "club_leader"), eventController.editForm);
+router.post("/:id", requireRoles("admin", "club_leader"), eventController.update);
+router.post("/:id/delete", requireRoles("admin", "club_leader"), eventController.destroy);
+router.post("/:id/register", requireRoles("admin", "club_leader", "member"), eventController.register);
 
 module.exports = router;

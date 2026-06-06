@@ -1,7 +1,7 @@
 const mainLayout = require("../layouts/mainLayout");
 const escapeHtml = require("../../utils/escapeHtml");
 
-function userFormView({ user = {}, action, title, showPassword = false }) {
+function userFormView({ user = {}, action, title, showPassword = false, currentUser = null }) {
     return mainLayout(title, `
         <h2>${title}</h2>
         <form method="POST" action="${action}">
@@ -34,7 +34,7 @@ function userFormView({ user = {}, action, title, showPassword = false }) {
                 <a class="button secondary" href="/users">Cancel</a>
             </div>
         </form>
-    `);
+    `, { currentUser });
 }
 
 module.exports = userFormView;

@@ -18,9 +18,22 @@ class EventRepository extends AbstractRepository {
             status: row.status,
             max_participants: row.max_participants,
             attendee_count: row.attendee_count,
+            registrations: row.registrations,
             created_at: row.created_at,
             updated_at: row.updated_at,
         });
+    }
+
+    toJson(value, fallback) {
+        if (value == null) {
+            return JSON.stringify(fallback);
+        }
+
+        if (typeof value === "string") {
+            return value;
+        }
+
+        return JSON.stringify(value);
     }
 
     async findAll() {
@@ -44,8 +57,8 @@ class EventRepository extends AbstractRepository {
     async create(data) {
         const [result] = await db.query(
             `INSERT INTO events
-                (club_id, title, description, location, event_date, status, max_participants, attendee_count)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                (club_id, title, description, location, event_date, status, max_participants, attendee_count, registrations)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 data.clubId,
                 data.title,
@@ -55,6 +68,7 @@ class EventRepository extends AbstractRepository {
                 data.status || "scheduled",
                 data.maxParticipants || null,
                 data.attendeeCount ?? 0,
+                this.toJson(data.registrations || [], []),
             ]
         );
 
@@ -64,7 +78,7 @@ class EventRepository extends AbstractRepository {
     async update(id, data) {
         await db.query(
             `UPDATE events
-             SET club_id = ?, title = ?, description = ?, location = ?, event_date = ?, status = ?, max_participants = ?, attendee_count = ?
+             SET club_id = ?, title = ?, description = ?, location = ?, event_date = ?, status = ?, max_participants = ?, attendee_count = ?, registrations = ?
              WHERE id = ?`,
             [
                 data.clubId,
@@ -75,6 +89,7 @@ class EventRepository extends AbstractRepository {
                 data.status,
                 data.maxParticipants || null,
                 data.attendeeCount ?? 0,
+                this.toJson(data.registrations || [], []),
                 id,
             ]
         );

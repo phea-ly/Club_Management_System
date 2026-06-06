@@ -27,10 +27,6 @@ class ClubRepository {
       return JSON.stringify(fallback);
     }
 
-    if (typeof value === "string") {
-      return value;
-    }
-
     return JSON.stringify(value);
   }
 

@@ -1,7 +1,7 @@
 const mainLayout = require("../layouts/mainLayout");
 const escapeHtml = require("../../utils/escapeHtml");
 
-function eventFormView({ event = {}, clubs = [], action, title }) {
+function eventFormView({ event = {}, clubs = [], action, title, currentUser = null }) {
     const clubOptions = clubs.map((club) => `
         <option value="${club.id}" ${String(event.clubId || "") === String(club.id) ? "selected" : ""}>
             ${escapeHtml(club.name)}
@@ -47,7 +47,7 @@ function eventFormView({ event = {}, clubs = [], action, title }) {
                 <a class="button secondary" href="/events${event.clubId ? `?clubId=${encodeURIComponent(event.clubId)}` : ""}">Cancel</a>
             </div>
         </form>
-    `);
+    `, { currentUser });
 }
 
 function formatDateTimeLocal(value) {

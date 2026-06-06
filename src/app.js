@@ -1,4 +1,5 @@
 const express = require("express");
+const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const clubRoutes = require("./routes/clubRoutes");
@@ -6,11 +7,13 @@ const memberRoutes = require("./routes/memberRoutes");
 const eventRoutes = require("./routes/eventRoutes");
 const userRepository = require("./repositories/UserRepository");
 const attendanceRoutes = require("./routes/attendanceRoutes");
+const { loadCurrentUser } = require("./middlewares/authMiddleware");
 
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(loadCurrentUser);
 
 app.get("/", (req, res) => {
   res.json({
@@ -19,6 +22,7 @@ app.get("/", (req, res) => {
   });
 });
 
+app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/profile", profileRoutes);
 app.use("/clubs", clubRoutes);

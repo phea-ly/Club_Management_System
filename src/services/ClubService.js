@@ -29,8 +29,8 @@ class ClubService {
       name: data.name,
       description: data.description,
       category: data.category,
-      leader: data.leader,
-      activities: data.activities || [],
+      leader: this.parseLeader(data.leader),
+      activities: this.parseActivities(data.activities),
     });
   }
 
@@ -41,7 +41,7 @@ class ClubService {
       name: data.name ?? existingClub.name,
       description: data.description ?? existingClub.description,
       category: data.category ?? existingClub.category,
-      leader: data.leader ?? existingClub.leader,
+      leader: data.leader !== undefined ? this.parseLeader(data.leader) : existingClub.leader,
       activities: data.activities ?? existingClub.activities,
     });
   }
@@ -148,6 +148,37 @@ class ClubService {
 
   hasText(value) {
     return typeof value === "string" && value.trim().length > 0;
+  }
+
+  parseActivities(value) {
+    if (Array.isArray(value)) {
+      return value.map((item) => String(item).trim()).filter(Boolean);
+    }
+
+    if (typeof value !== "string") {
+      return [];
+    }
+
+    return value
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  parseLeader(value) {
+    if (value && typeof value === "object") {
+      if (this.hasText(value.name)) {
+        return { name: value.name.trim() };
+      }
+
+      throw new Error("Club leader name is required");
+    }
+
+    if (!this.hasText(value)) {
+      throw new Error("Club leader name is required");
+    }
+
+    return { name: value.trim() };
   }
 }
 

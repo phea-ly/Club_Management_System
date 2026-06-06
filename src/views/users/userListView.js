@@ -1,7 +1,7 @@
 const mainLayout = require("../layouts/mainLayout");
 const escapeHtml = require("../../utils/escapeHtml");
 
-function userListView(users) {
+function userListView(users, currentUser = null) {
     const rows = users.map((user) => `
         <tr>
             <td>${user.id}</td>
@@ -39,7 +39,7 @@ function userListView(users) {
             </thead>
             <tbody>${rows || "<tr><td colspan='6'>No users yet.</td></tr>"}</tbody>
         </table>
-    `);
+    `, { currentUser });
 }
 
 module.exports = userListView;

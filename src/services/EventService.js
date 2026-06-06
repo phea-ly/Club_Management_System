@@ -87,6 +87,49 @@ class EventService extends AbstractService {
         return this.eventRepository.delete(id);
     }
 
+    async registerForEvent(id, participant) {
+        const event = await this.getEventById(id);
+
+        if (!event || event.status === "cancelled") {
+            throw new NotFoundError("Event not found");
+        }
+
+        const student = this.normalizeParticipant(participant);
+        const registrations = Array.isArray(event.registrations) ? [...event.registrations] : [];
+
+        const alreadyRegistered = registrations.some((entry) =>
+            (student.email && entry.email && entry.email.toLowerCase() === student.email.toLowerCase()) ||
+            (student.name && entry.name && entry.name.toLowerCase() === student.name.toLowerCase())
+        );
+
+        if (alreadyRegistered) {
+            throw new ValidationError("You are already registered for this event");
+        }
+
+        if (event.maxParticipants !== null && event.maxParticipants !== undefined && registrations.length >= Number(event.maxParticipants)) {
+            throw new ValidationError("This event is already full");
+        }
+
+        registrations.push({
+            name: student.name,
+            email: student.email,
+            role: student.role,
+            registeredAt: new Date().toISOString(),
+        });
+
+        return this.eventRepository.update(event.id, {
+            clubId: event.clubId,
+            title: event.title,
+            description: event.description,
+            location: event.location,
+            eventDate: event.eventDate,
+            status: event.status,
+            maxParticipants: event.maxParticipants,
+            attendeeCount: registrations.length,
+            registrations,
+        });
+    }
+
     #validateEventData(data, requireAll = true) {
         if (requireAll || data.title !== undefined) {
             if (!data.title || data.title.trim().length < 2) {
@@ -148,6 +191,25 @@ class EventService extends AbstractService {
         }
 
         return date.toISOString().slice(0, 19).replace("T", " ");
+    }
+
+    normalizeParticipant(participant) {
+        if (!participant) {
+            throw new ValidationError("Participant information is required");
+        }
+
+        const name = typeof participant.name === "string" ? participant.name.trim() : "";
+        const email = typeof participant.email === "string" ? participant.email.trim() : "";
+
+        if (!name && !email) {
+            throw new ValidationError("Participant name or email is required");
+        }
+
+        return {
+            name: name || email,
+            email,
+            role: participant.role || "member",
+        };
     }
 }
 

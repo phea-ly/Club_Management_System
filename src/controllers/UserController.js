@@ -13,7 +13,7 @@ class UserController extends AbstractController {
     index = async (req, res) => {
         try {
             const users = await this.userService.getAllUsers();
-            return res.send(userListView(users));
+            return res.send(userListView(users, req.user));
         } catch (error) {
             return this.handleError(res, error);
         }
@@ -24,7 +24,8 @@ class UserController extends AbstractController {
             return res.send(userFormView({
                 title: "Create User",
                 action: "/users",
-                showPassword: true
+                showPassword: true,
+                currentUser: req.user
             }));
         } catch (error) {
             return this.handleError(res, error);
@@ -47,7 +48,8 @@ class UserController extends AbstractController {
                 user,
                 title: "Edit User",
                 action: `/users/${user.id}`,
-                showPassword: false
+                showPassword: false,
+                currentUser: req.user
             }));
         } catch (error) {
             return this.handleError(res, error);
@@ -75,7 +77,7 @@ class UserController extends AbstractController {
     profileForm = async (req, res) => {
         try {
             const user = await this.userService.getUserById(req.params.id);
-            return res.send(profileView(user));
+            return res.send(profileView(user, req.user));
         } catch (error) {
             return this.handleError(res, error);
         }
@@ -93,7 +95,7 @@ class UserController extends AbstractController {
     passwordForm = async (req, res) => {
         try {
             const user = await this.userService.getUserById(req.params.id);
-            return res.send(passwordView(user));
+            return res.send(passwordView(user, req.user));
         } catch (error) {
             return this.handleError(res, error);
         }

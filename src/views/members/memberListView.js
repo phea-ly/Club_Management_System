@@ -5,7 +5,7 @@ function statusBadge(status) {
     return `<span class="badge badge-${escapeHtml(status)}">${escapeHtml(status)}</span>`;
 }
 
-function memberListView({ members, clubs, filters = {} }) {
+function memberListView({ members, clubs, filters = {}, currentUser = null }) {
     const rows = members.map((member) => `
         <tr>
             <td>${member.id}</td>
@@ -65,7 +65,7 @@ function memberListView({ members, clubs, filters = {} }) {
             </thead>
             <tbody>${rows || "<tr><td colspan='8'>No members found.</td></tr>"}</tbody>
         </table>
-    `);
+    `, { currentUser });
 }
 
 function getClubName(clubs, clubId) {

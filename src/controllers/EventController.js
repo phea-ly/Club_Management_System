@@ -16,7 +16,7 @@ class EventController extends AbstractController {
                 this.eventService.getClubs(),
             ]);
 
-            return res.send(eventListView({ events, clubs, filters: req.query }));
+            return res.send(eventListView({ events, clubs, filters: req.query, currentUser: req.user }));
         } catch (error) {
             return this.handleError(res, error);
         }
@@ -31,6 +31,7 @@ class EventController extends AbstractController {
                 event: { clubId: req.query.clubId || "", status: "scheduled" },
                 title: "Create Event",
                 action: "/events",
+                currentUser: req.user,
             }));
         } catch (error) {
             return this.handleError(res, error);
@@ -59,6 +60,7 @@ class EventController extends AbstractController {
                 event,
                 title: "Edit Event",
                 action: `/events/${event.id}`,
+                currentUser: req.user,
             }));
         } catch (error) {
             return this.handleError(res, error);
@@ -79,6 +81,24 @@ class EventController extends AbstractController {
             const event = await this.eventService.getEventById(req.params.id);
             await this.eventService.deleteEvent(req.params.id);
             return res.redirect(`/events?clubId=${encodeURIComponent(event.clubId)}`);
+        } catch (error) {
+            return this.handleError(res, error);
+        }
+    };
+
+    register = async (req, res) => {
+        try {
+            const event = await this.eventService.registerForEvent(req.params.id, req.user);
+
+            if (String(req.headers.accept || "").toLowerCase().includes("text/html")) {
+                return res.redirect("/events");
+            }
+
+            return res.json({
+                success: true,
+                message: "Registered for event successfully",
+                data: event,
+            });
         } catch (error) {
             return this.handleError(res, error);
         }
